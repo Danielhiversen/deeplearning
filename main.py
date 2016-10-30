@@ -172,7 +172,7 @@ def get_data2():
     h5f = h5py.File(filename, 'r')
     return h5f
 
-h5f = get_data2()
+h5f = get_data()
 X = h5f['X']
 Y = h5f['Y']
 
