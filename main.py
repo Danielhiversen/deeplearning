@@ -99,7 +99,7 @@ def get_data():
         dataset.close()
 
     h5f = h5py.File(filename, 'r')
-    return
+    return h5f
 
 
 def get_data2():
@@ -160,7 +160,7 @@ def get_data2():
 
                 #        dataset = h5py.File(filename, 'w')
             dataset['X'][i] = X
-            dataset['Y'][i] = (glioma_grade - 2)
+            dataset['Y'][i] = glioma_grade - 2
             dataset.flush()
             i = i + 1
             print(temp.shape)
@@ -170,7 +170,7 @@ def get_data2():
         dataset.close()
 
     h5f = h5py.File(filename, 'r')
-    return (h5f['X'], h5f['Y'])
+    return h5f
 
 h5f = get_data2()
 X = h5f['X']
@@ -178,7 +178,6 @@ Y = h5f['Y']
 
 #X_test = h5f['cifar10_X_test']
 
-print(Y)
 print(min(Y), max(Y))
 
 #Y_test = h5f['cifar10_Y_test']
@@ -195,46 +194,45 @@ from tflearn.layers.core import input_data, dropout, fully_connected
 from tflearn.layers.conv import conv_3d, max_pool_3d, avg_pool_3d
 from tflearn.layers.estimator import regression
 
-print(Y)
-Y = to_categorical(Y, max(Y)+1)
+Y = to_categorical(Y, int(max(Y)+1))
 
 img_prep = ImagePreprocessing()
 img_prep.add_featurewise_zero_center()
 img_prep.add_featurewise_stdnorm()
 
 # Building 'VGG Network'
-network = input_data(shape=[None, 197, 233, 189])
+network = input_data(shape=[None, 197, 233, 189, 1])
 
 network = conv_3d(network, 4, 3, activation='relu')
 network = conv_3d(network, 4, 3, activation='relu')
-network = max_pool_3d(network, 2, strides=2)
+network = max_pool_3d(network, [1, 2, 2, 2, 1], strides=2)
 
 network = conv_3d(network, 8, 3, activation='relu')
 network = conv_3d(network, 8, 3, activation='relu')
-network = max_pool_3d(network, 2, strides=2)
+network = max_pool_3d(network, [1, 2, 2, 2, 1], strides=2)
 
 network = conv_3d(network, 64, 3, activation='relu')
 network = conv_3d(network, 64, 3, activation='relu')
-network = max_pool_3d(network, 2, strides=2)
+network = max_pool_3d(network, [1, 2, 2, 2, 1], strides=2)
 
 network = conv_3d(network, 128, 3, activation='relu')
 network = conv_3d(network, 128, 3, activation='relu')
-network = max_pool_3d(network, 2, strides=2)
+network = max_pool_3d(network, [1, 2, 2, 2, 1], strides=2)
 
 network = conv_3d(network, 256, 3, activation='relu')
 network = conv_3d(network, 256, 3, activation='relu')
 network = conv_3d(network, 256, 3, activation='relu')
-network = max_pool_3d(network, 2, strides=2)
+network = max_pool_3d(network, [1, 2, 2, 2, 1], strides=2)
 
 network = conv_3d(network, 512, 3, activation='relu')
 network = conv_3d(network, 512, 3, activation='relu')
 network = conv_3d(network, 512, 3, activation='relu')
-network = max_pool_3d(network, 2, strides=2)
+network = max_pool_3d(network, [1, 2, 2, 2, 1], strides=2)
 
 network = conv_3d(network, 512, 3, activation='relu')
 network = conv_3d(network, 512, 3, activation='relu')
 network = conv_3d(network, 512, 3, activation='relu')
-network = max_pool_3d(network, 2, strides=2)
+network = max_pool_3d(network, [1, 2, 2, 2, 1], strides=2)
 
 network = fully_connected(network, 4096, activation='relu')
 network = dropout(network, 0.5)
