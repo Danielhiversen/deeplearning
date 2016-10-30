@@ -15,12 +15,12 @@ from __future__ import division, print_function, absolute_import
 import os
 import sys
 
-sys.path.append('/mnt/dokumneter/sintef/NeuroImageRegistration/')
 import sqlite3
 import nibabel as nib
 import numpy as np
 import h5py
 
+sys.path.append('/mnt/dokumneter/sintef/NeuroImageRegistration/')
 import util
 
 # Data loading and preprocessing
@@ -194,7 +194,8 @@ from tflearn.layers.core import input_data, dropout, fully_connected
 from tflearn.layers.conv import conv_3d, max_pool_3d, avg_pool_3d
 from tflearn.layers.estimator import regression
 
-Y = to_categorical(Y, int(max(Y)+1))
+num_of_categories = int(max(Y)+1)
+Y = to_categorical(Y, num_of_categories)
 
 img_prep = ImagePreprocessing()
 img_prep.add_featurewise_zero_center()
@@ -238,7 +239,7 @@ network = fully_connected(network, 4096, activation='relu')
 network = dropout(network, 0.5)
 network = fully_connected(network, 4096, activation='relu')
 network = dropout(network, 0.5)
-network = fully_connected(network, 3, activation='softmax')
+network = fully_connected(network, num_of_categories, activation='softmax')
 
 network = regression(network, optimizer='rmsprop',
                      loss='categorical_crossentropy',
