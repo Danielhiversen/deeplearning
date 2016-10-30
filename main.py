@@ -36,69 +36,146 @@ conn = sqlite3.connect(util.DB_PATH)
 conn.text_factory = str
 cursor = conn.execute('''SELECT pid from QualityOfLife''')
 
-filename = 'gbm_data.h5'
-if not os.path.exists(filename):
-    X = []
-    Y = []
-    PID = []
-    conn = sqlite3.connect(util.DB_PATH)
-    conn.text_factory = str
 
-    image_ids = util.find_images_with_qol()
-    print(image_ids)
-    i = 0
-    for image_id in image_ids:
-        print(image_id)
-        cursor = conn.execute('''SELECT filepath_reg, pid from Images where id = ? ''', (image_id,))
-        db_temp = cursor.fetchone()
-        if not db_temp:
-            continue
-        t1_vol = util.DATA_FOLDER + db_temp[0]
-        pid = db_temp[1]
-        qol = conn.execute('SELECT {} from QualityOfLife where pid = ?'.format('Global_index'), (pid,)).fetchone()[0]
-        if not qol:
-            continue
+def get_data():
+    filename = 'gbm_data.h5'
+    if not os.path.exists(filename):
+        X = []
+        Y = []
+        PID = []
+        conn = sqlite3.connect(util.DB_PATH)
+        conn.text_factory = str
 
-        (label_vol, label) = util.find_reg_label_images(image_id)[0]
-        label_img = nib.load(label_vol)
-        label_data = np.array(label_img.get_data())
-        temp = np.sum(np.sum(label_data, axis=0), axis=0)
-        z = np.argmax(temp)
-        label_slice = label_data[:, :, z]
-        # np.save(util.TEMP_FOLDER_PATH + "/res/" + pid + "_label", label_slice)
+        image_ids = util.find_images_with_qol()
+        print(image_ids)
+        i = 0
+        for image_id in image_ids:
+            print(image_id)
+            cursor = conn.execute('''SELECT filepath_reg, pid from Images where id = ? ''', (image_id,))
+            db_temp = cursor.fetchone()
+            if not db_temp:
+                continue
+            t1_vol = util.DATA_FOLDER + db_temp[0]
+            pid = db_temp[1]
+            qol = conn.execute('SELECT {} from QualityOfLife where pid = ?'.format('Global_index'), (pid,)).fetchone()[
+                0]
+            if not qol:
+                continue
 
-        t1_img = nib.load(t1_vol)
-        t1_data = np.array(t1_img.get_data())
-        #t1_slice = t1_data[:, :, z]
-        # np.save(util.TEMP_FOLDER_PATH + "/res/" + pid + "_t1", t1_slice)
+            (label_vol, label) = util.find_reg_label_images(image_id)[0]
+            label_img = nib.load(label_vol)
+            label_data = np.array(label_img.get_data())
+            temp = np.sum(np.sum(label_data, axis=0), axis=0)
+            z = np.argmax(temp)
+            label_slice = label_data[:, :, z]
+            # np.save(util.TEMP_FOLDER_PATH + "/res/" + pid + "_label", label_slice)
 
-        # print(t1_slice[:, np.newaxis].shape)
-        X = t1_data # t1_slice[:, :, np.newaxis]
-        if not os.path.exists(filename):
-            # Open a file in "w"rite mode
-            d_imgshape = (len(image_ids), X.shape[0], X.shape[1], X.shape[2])
-            d_labelshape = (len(image_ids), )
+            t1_img = nib.load(t1_vol)
+            t1_data = np.array(t1_img.get_data())
+            # t1_slice = t1_data[:, :, z]
+            # np.save(util.TEMP_FOLDER_PATH + "/res/" + pid + "_t1", t1_slice)
 
-            dataset = h5py.File(filename, 'w')
-            dataset.create_dataset('X', d_imgshape, chunks=True)
-            dataset.create_dataset('Y', d_labelshape, chunks=True)
-#            dataset.close()
+            # print(t1_slice[:, np.newaxis].shape)
+            X = t1_data[:, :, :, np.newaxis]
+            if not os.path.exists(filename):
+                # Open a file in "w"rite mode
+                d_imgshape = (len(image_ids), X.shape[0], X.shape[1], X.shape[2], X.shape[3])
+                d_labelshape = (len(image_ids),)
 
-#        dataset = h5py.File(filename, 'w')
-        dataset['X'][i] = X
-        dataset['Y'][i] = (qol-1)
-        dataset.flush()
-        i= i + 1
-        print(temp.shape)
+                dataset = h5py.File(filename, 'w')
+                dataset.create_dataset('X', d_imgshape, chunks=True)
+                dataset.create_dataset('Y', d_labelshape, chunks=True)
+                #            dataset.close()
 
-    cursor.close()
-    conn.close()
-    dataset.close()
+                #        dataset = h5py.File(filename, 'w')
+            dataset['X'][i] = X
+            dataset['Y'][i] = (qol - 1)
+            dataset.flush()
+            i = i + 1
+            print(temp.shape)
+
+        cursor.close()
+        conn.close()
+        dataset.close()
+
+    h5f = h5py.File(filename, 'r')
+    return
 
 
-h5f = h5py.File(filename, 'r')
+def get_data2():
+    filename = 'gbm_data2.h5'
+    if not os.path.exists(filename):
+        X = []
+        Y = []
+        PID = []
+        conn = sqlite3.connect(util.DB_PATH)
+        conn.text_factory = str
+
+        cursor2 = conn.execute('''SELECT id,filepath_reg from Images where diag_pre_post = ?''',("pre",))
+        image_ids = []
+        for _id in cursor2:
+            if _id[1] is None:
+                continue
+            image_ids.append(_id[0])
+        cursor2.close()
+
+        i = 0
+        for image_id in image_ids:
+            print(image_id)
+            cursor = conn.execute('''SELECT filepath_reg, pid from Images where id = ? ''', (image_id,))
+            db_temp = cursor.fetchone()
+            if not db_temp:
+                continue
+            t1_vol = util.DATA_FOLDER + db_temp[0]
+            pid = db_temp[1]
+            glioma_grade = conn.execute('''SELECT glioma_grade from Patient where pid = ?''', (pid,)).fetchone()[
+                0]
+            if not glioma_grade:
+                continue
+
+            (label_vol, label) = util.find_reg_label_images(image_id)[0]
+            label_img = nib.load(label_vol)
+            label_data = np.array(label_img.get_data())
+            temp = np.sum(np.sum(label_data, axis=0), axis=0)
+            z = np.argmax(temp)
+            label_slice = label_data[:, :, z]
+            # np.save(util.TEMP_FOLDER_PATH + "/res/" + pid + "_label", label_slice)
+
+            t1_img = nib.load(t1_vol)
+            t1_data = np.array(t1_img.get_data())
+            # t1_slice = t1_data[:, :, z]
+            # np.save(util.TEMP_FOLDER_PATH + "/res/" + pid + "_t1", t1_slice)
+
+            # print(t1_slice[:, np.newaxis].shape)
+            X = t1_data[:, :, :, np.newaxis]
+            if not os.path.exists(filename):
+                # Open a file in "w"rite mode
+                d_imgshape = (len(image_ids), X.shape[0], X.shape[1], X.shape[2], X.shape[3])
+                d_labelshape = (len(image_ids),)
+
+                dataset = h5py.File(filename, 'w')
+                dataset.create_dataset('X', d_imgshape, chunks=True)
+                dataset.create_dataset('Y', d_labelshape, chunks=True)
+                #            dataset.close()
+
+                #        dataset = h5py.File(filename, 'w')
+            dataset['X'][i] = X
+            dataset['Y'][i] = (glioma_grade - 2)
+            dataset.flush()
+            i = i + 1
+            print(temp.shape)
+
+        cursor.close()
+        conn.close()
+        dataset.close()
+
+    h5f = h5py.File(filename, 'r')
+    return (h5f['X'], h5f['Y'])
+
+h5f = get_data2()
 X = h5f['X']
 Y = h5f['Y']
+
 #X_test = h5f['cifar10_X_test']
 
 print(Y)
@@ -119,7 +196,7 @@ from tflearn.layers.conv import conv_3d, max_pool_3d, avg_pool_3d
 from tflearn.layers.estimator import regression
 
 print(Y)
-Y = to_categorical(Y, 3)
+Y = to_categorical(Y, max(Y)+1)
 
 img_prep = ImagePreprocessing()
 img_prep.add_featurewise_zero_center()
