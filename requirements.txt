@@ -99,7 +99,7 @@ pbr==1.10.0
 pep8==1.7.0
 pexpect==4.0.1
 phue==0.8
-Pillow==6.2.0
+Pillow==7.1.0
 piston-mini-client==0.7.5
 plainbox==0.25
 PlexAPI==1.1.0
