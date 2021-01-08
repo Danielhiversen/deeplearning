@@ -231,7 +231,7 @@ tflearn==0.2.1
 transitions==0.2.5
 transmissionrpc==0.11
 twilio==5.4.0
-Twisted==19.7.0
+Twisted==20.3.0
 TwitterAPI==2.4.1
 tzlocal==1.2.2
 uber-rides==0.2.1
