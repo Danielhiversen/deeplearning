@@ -61,7 +61,7 @@ insteon-hub==0.4.5
 ipython==2.4.1
 isort==4.2.5
 itsdangerous==0.24
-Jinja2==2.8
+Jinja2==2.11.3
 jmespath==0.9.0
 jsonrpc-requests==0.3
 keyring==8.7
