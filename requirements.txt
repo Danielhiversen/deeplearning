@@ -113,7 +113,7 @@ ptyprocess==0.5
 pubnub==3.7.6
 pushbullet.py==0.10.0
 pushetta==1.0.15
-py==1.4.31
+py==1.10.0
 py-cpuinfo==0.2.3
 pyalarmdotcom==0.0.7
 pyasn1==0.1.9
