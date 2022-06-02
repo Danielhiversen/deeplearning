@@ -53,7 +53,7 @@ hbmqtt==0.7.1
 heatmiserV3==0.9.1
 hikvision==0.4
 homeassistant==0.23.1
-html5lib==0.999
+html5lib==0.99999999
 httplib2==0.19.0
 idna==2.0
 influxdb==3.0.0
