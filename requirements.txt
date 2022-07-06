@@ -75,7 +75,7 @@ limitlessled==1.0.0
 lnetatmo==0.5.0
 logilab-common==1.1.0
 louis==2.6.4
-lxml==4.6.3
+lxml==4.9.1
 MarkupSafe==0.23
 matplotlib==1.5.1
 mccabe==0.2.1
